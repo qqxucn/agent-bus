@@ -47,7 +47,7 @@ async function main() {
   // Panel frontend static files
   // Default: dev path (monorepo), override via PANEL_FRONTEND_PATH env for Docker
   const panelFrontendPath = process.env.PANEL_FRONTEND_PATH
-    || path.join(__dirname, '..', '..', 'panel-frontend');
+    || path.join(__dirname, '..', 'panel-frontend');
   app.use('/panel', express.static(panelFrontendPath));
 
   // 6. Create HTTP server and attach WS

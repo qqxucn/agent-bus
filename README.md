@@ -12,7 +12,7 @@ agent-bus/
 │   └── bus-server/        ← 总线服务端 (v1.1.0, TypeScript/Node.js)
 ├── contrib/
 │   └── hermes-adapter/    ← Hermes 原生平台适配器 (v2.0.0, Python)
-├── panel-frontend/        ← 管理面板 (🔜 开发中)
+├── panel-frontend/        ← 管理面板 (✅ 已就绪)
 ├── docs/                  ← 协议接口规范文档
 ├── VERSION                ← 全局版本声明
 └── README.md

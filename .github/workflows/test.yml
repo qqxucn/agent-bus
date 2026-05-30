@@ -1,0 +1,108 @@
+name: Test Suite
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+
+  # ── bus-server 单元测试 ──
+  bus-server-unit:
+    name: bus-server (unit)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/bus-server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: packages/bus-server/package-lock.json
+      - run: npm install
+      - run: npm test
+        env:
+          CI: true
+
+  # ── relay-server 单元测试 ──
+  relay-server-unit:
+    name: relay-server (unit)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/relay-server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: packages/relay-server/package-lock.json
+      - run: npm install
+      - run: npm test
+        env:
+          CI: true
+
+  # ── Python SDK 单元测试 ──
+  python-sdk-unit:
+    name: python-sdk (unit)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/python-sdk
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: packages/python-sdk/pyproject.toml
+      - run: pip install -e .
+      - run: python -m unittest tests/test_all.py -v
+
+  # ── TypeScript SDK 单元测试 ──
+  typescript-sdk-unit:
+    name: typescript-sdk (unit)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/typescript-sdk
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: packages/typescript-sdk/package-lock.json
+      - run: npm install
+      - run: npm test
+        env:
+          CI: true
+
+  # ── 集成测试（总线+SDK 全链路验证） ──
+  integration:
+    name: integration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # 安装 bus-server 依赖（集成测试需要 tsx 启动总线）
+      - name: Install bus-server dependencies
+        working-directory: packages/bus-server
+        run: npm ci
+
+      # 运行集成测试
+      - name: Run integration tests
+        working-directory: tests/integration
+        run: python test_message_flow.py
+        env:
+          CI: true

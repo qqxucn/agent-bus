@@ -1,11 +1,21 @@
 """
-Agent Bus 平台适配器
+Agent Bus 平台适配器 v2.0.1
 ====================
 
 将 Hermes 的消息总线（agent-bus）集成为 Hermes 原生平台适配器，
 继承 BasePlatformAdapter，支持 WebSocket 和 HTTP 轮询双模式。
 
-配置（config.yaml）:
+配置方式（推荐环境变量 / .env 文件）:
+```env
+AGENT_BUS_ENABLED=true
+AGENT_BUS_URL=http://localhost:4322
+AGENT_BUS_WS_URL=ws://localhost:4322/ws
+AGENT_BUS_AGENT_ID=hermes
+# AGENT_BUS_TOKEN 可选，留空则首次启动时自动注册到总线并生成 token
+AGENT_BUS_MODE=websocket
+```
+
+（可选）config.yaml 顶层 platforms 配置:
 ```yaml
 platforms:
   agent_bus:
@@ -14,17 +24,11 @@ platforms:
       bus_url: "http://localhost:4322"
       bus_ws_url: "ws://localhost:4322/ws"
       agent_id: "hermes"
-      agent_token: "<token>"
-      mode: "websocket"       # 可选: "websocket" | "poll"
+      # agent_token: <可选，留空则自动注册>
+      mode: "websocket"
 ```
 
-环境变量:
-- AGENT_BUS_ENABLED=true
-- AGENT_BUS_URL=http://localhost:4322
-- AGENT_BUS_WS_URL=ws://localhost:4322/ws
-- AGENT_BUS_AGENT_ID=hermes
-- AGENT_BUS_TOKEN=<token>
-- AGENT_BUS_MODE=websocket  # 可选
+注意：config.yaml 中 display.platforms（缩进在 display: 下）不用于加载平台适配器，请勿在那里配置。推荐使用 .env 环境变量方式。
 """
 
 from __future__ import annotations
@@ -66,7 +70,7 @@ MAX_MESSAGE_LENGTH = 65536  # 总线消息长度上限
 # ── 版本号 ──
 # 与 claw-bus (OpenClaw 侧) 统一版本，方便两边对齐排查
 AGENT_BUS_PROTOCOL_VERSION = "1.1"      # 总线协议版本（两边共用）
-AGENT_BUS_IMPLEMENTATION_VERSION = "2.0.0"  # 实现版本（两边同步迭代）
+AGENT_BUS_IMPLEMENTATION_VERSION = "2.0.1"  # 实现版本（两边同步迭代）
 
 
 # ── 依赖检查 ───────────────────────────────────────────────────────────────
@@ -170,7 +174,12 @@ class AgentBusAdapter(BasePlatformAdapter):
         self.bus_url: str = extra.get("bus_url", os.getenv("AGENT_BUS_URL", "http://localhost:4322"))
         self.bus_ws_url: str = extra.get("bus_ws_url", os.getenv("AGENT_BUS_WS_URL", ""))
         self.agent_id: str = extra.get("agent_id", os.getenv("AGENT_BUS_AGENT_ID", AGENT_ID))
-        self.agent_token: str = extra.get("agent_token", config.token or os.getenv("AGENT_BUS_TOKEN", ""))
+        # Token 获取优先级：环境变量 > 配置 > token 缓存文件
+        self._token_file: Path = Path(os.getenv("HERMES_HOME", str(Path.home() / ".hermes"))) / "agent_bus.token"
+        raw_token = extra.get("agent_token", config.token or os.getenv("AGENT_BUS_TOKEN", ""))
+        if not raw_token:
+            raw_token = self._load_saved_token()
+        self.agent_token: str = raw_token or ""
         self.mode: str = extra.get("mode", os.getenv("AGENT_BUS_MODE", "websocket"))
         self.poll_interval: int = int(extra.get("poll_interval", 3))
 
@@ -208,12 +217,20 @@ class AgentBusAdapter(BasePlatformAdapter):
         """连接到消息总线。"""
         logger.info("[AgentBus] 正在连接... mode=%s, bus=%s", self.mode, self.bus_url)
 
-        if not self.agent_token:
-            logger.error("[AgentBus] 缺少 agent_token，请设置 AGENT_BUS_TOKEN 环境变量或 config.extra.agent_token")
-            self._set_fatal_error("no_token", "Agent Bus token not configured", retryable=False)
-            return False
-
         self._http_client = httpx.AsyncClient(timeout=30.0)
+
+        # 如果 token 为空，尝试自动注册
+        if not self.agent_token:
+            logger.info("[AgentBus] token 为空，尝试自动注册 agent_id=%s ...", self.agent_id)
+            auto_token = await self._auto_register()
+            if not auto_token:
+                logger.error("[AgentBus] 自动注册失败，无法连接总线")
+                await self._http_client.aclose()
+                self._http_client = None
+                self._set_fatal_error("auto_register_failed", "Auto register failed", retryable=True)
+                return False
+            self.agent_token = auto_token
+            self._save_token(auto_token)
 
         # 注册到总线（获取身份确认）
         try:
@@ -534,6 +551,66 @@ class AgentBusAdapter(BasePlatformAdapter):
                 raise RuntimeError(
                     f"注册失败 (HTTP {resp.status_code}): {resp.text[:200]}"
                 )
+
+    # ── 自动注册（无 token 时使用） ──────────────────────────────────────
+
+    async def _auto_register(self) -> Optional[str]:
+        """无 token 时自动注册到总线，返回服务端生成的 token。"""
+        bus_url = self.bus_url.rstrip("/")
+        if self._http_client is None:
+            self._http_client = httpx.AsyncClient(timeout=30.0)
+
+        logger.info("[AgentBus] 自动注册 agent_id=%s 到 %s ...", self.agent_id, bus_url)
+
+        try:
+            # 不带 Authorization header，因为还没有 token
+            resp = await self._http_client.post(
+                f"{bus_url}/api/agents/register",
+                json={
+                    "agent_id": self.agent_id,
+                    "display_name": self.agent_id,
+                },
+                timeout=15.0,
+            )
+
+            if resp.status_code == 200:
+                data = resp.json().get("data", {})
+                token = data.get("token")
+                if token:
+                    self._registered = True
+                    logger.info("[AgentBus] 自动注册成功，token 已获取")
+                    return token
+
+            logger.warning("[AgentBus] 自动注册返回 %d: %s", resp.status_code, resp.text[:200])
+            return None
+
+        except Exception as e:
+            logger.error("[AgentBus] 自动注册异常: %s", e)
+            return None
+
+    # ── Token 持久化 ─────────────────────────────────────────────────────
+
+    def _load_saved_token(self) -> Optional[str]:
+        """从 token 缓存文件读取已保存的 token。"""
+        try:
+            if self._token_file.exists():
+                token = self._token_file.read_text(encoding="utf-8").strip()
+                if token:
+                    logger.debug("[AgentBus] 从文件读取已保存的 token")
+                    return token
+        except Exception as e:
+            logger.debug("[AgentBus] 读取 token 文件失败: %s", e)
+        return None
+
+    def _save_token(self, token: str) -> None:
+        """将 token 持久化到缓存文件。"""
+        try:
+            self._token_file.parent.mkdir(parents=True, exist_ok=True)
+            self._token_file.write_text(token, encoding="utf-8")
+            self._token_file.chmod(0o600)  # 仅所有者可读写
+            logger.info("[AgentBus] token 已保存到 %s", self._token_file)
+        except Exception as e:
+            logger.warning("[AgentBus] 保存 token 失败: %s", e)
 
     # ── WebSocket 模式 ──────────────────────────────────────────────────
 

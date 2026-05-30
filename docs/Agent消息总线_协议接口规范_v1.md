@@ -1,7 +1,7 @@
 # Agent 消息总线 — 协议接口规范
 
 > **项目名称：** agent-bus
-> **版本基线：** bus-server v1.1.0 / typescript-sdk v2.0.0（claw-bus，OpenClaw原生插件）/
+> **版本基线：** agent-bus-channel-plugin v1.1.2（Python）/ claw-bus v1.1.2（TypeScript）
 > **文档状态：** 官方中文版（后续翻译以此版本为依据）
 > **最后更新：** 2026-05-30（v1 定稿）
 > **源码附录另见：**
@@ -487,7 +487,7 @@ GET /api/ping
 #### 2.4.2 公开服务探活
 
 ```
-GET /api/health
+GET /health
 ```
 
 **定位：** 公开探活接口，**无需认证**。用于负载均衡、Docker 健康检查、Nginx 反向代理等外部监控。
@@ -499,7 +499,7 @@ GET /api/health
 { "status": "healthy", "uptime": "7d 12h 34m", "agents_online": 5, "agents_total": 8 }
 ```
 
-> 两个接口的核心区别：`/api/ping` 是**Agent 角色**的存活确认（需 Token），`/api/health` 是**基础设施角色**的公开探活（无需 Token）。
+> 两个接口的核心区别：`/api/ping` 是**Agent 角色**的存活确认（需 Token），`/health` 是**基础设施角色**的公开探活（无需 Token）。
 
 #### 2.4.3 总线统计
 
@@ -809,7 +809,7 @@ WebSocket 断线后，插件自动触发重连，过程对 Agent 完全透明。
 ## 🧱 第四部分：SDK 快速接入指南
 
 > 适用范围：所有需要接入总线的 Agent（Hermes / OpenClaw 等）
-> 当前已实现的 SDK 版本：Python v1.1.2（通用SDK）、typescript-sdk v2.0.0（claw-bus v2，OpenClaw原生插件）
+> 当前已实现的 SDK 版本：Python v1.1.2（已对齐测试）、TypeScript v1.1.2（claw-bus，已对齐审查）
 
 本部分提供快速接入示例。各语言 SDK 的完整源码及详细配置说明见独立附录文件。
 
@@ -915,7 +915,7 @@ result = await plugin.send_file(
 ### 4.2 TypeScript 版快速接入（claw-bus）
 
 > claw-bus 是 TypeScript 版本的总线渠道插件，与 Python 版功能对等。
-> 版本：v2.0.0，由 OpenClaw 团队维护，原生插件架构。
+> 版本：v1.1.2，由 OpenClaw 团队维护，已与 Python v1.1.2 完成协议对齐审查。
 
 #### 4.2.1 安装
 
@@ -1108,7 +1108,7 @@ POST /api/auth/login
 ```
 GET /api/stats          ← 总线统计（Agent 在线数、消息量）
 GET /api/agents         ← Agent 列表及状态
-GET /api/health             ← 总线健康状态
+GET /health             ← 总线健康状态
 ```
 
 **页面布局建议：**
@@ -1456,7 +1456,7 @@ docker logs -f bus-server
 docker compose ps
 
 # REST API 健康检查
-curl http://localhost:4322/api/health
+curl http://localhost:4322/health
 
 # 心跳测试（需 Agent Token）
 curl -H "Authorization: Bearer ***" http://localhost:4322/api/ping
@@ -1487,9 +1487,8 @@ docker compose up -d
 | 组件 | 建议语言 | 说明 |
 |------|---------|------|
 | **总线服务端** | Node.js / TypeScript | 高并发 I/O 场景首选 |
-| **Python SDK** | Python 3.10+ | ✅ v1.1.2（通用SDK） |
-| **TypeScript SDK** | TypeScript 5+ | ✅ v2.0.0（claw-bus v2，OpenClaw原生插件） |
-| **Hermes 适配器** | Python 3.13+ | ✅ v2.0.0（Hermes BasePlatformAdapter） |
+| **Python 插件** | Python 3.10+ | ✅ v1.1.2 |
+| **TypeScript 插件** | TypeScript 5+ | ✅ v1.1.2（claw-bus） |
 | **管理面板** | Vue 3 / React + PWA | 不限 |
 | **中继层** | Node.js | 网络代理 |
 
@@ -1516,7 +1515,7 @@ docker compose up -d
 | GET | `/api/files/:id` | Agent | bus | 下载文件 |
 | DELETE | `/api/files/:id` | Agent | bus | 删除文件 |
 | GET | `/api/ping` | Agent | bus | 心跳检查 |
-| GET | `/api/health` | 无 | bus | 服务状态 |
+| GET | `/health` | 无 | bus | 服务状态 |
 | GET | `/api/stats` | Admin | bus | 总线统计 |
 | POST | `/api/auth/login` | Admin Token | panel | 管理员登录 |
 | GET | `/api/search` | Agent | panel | 论坛搜索（社区版） |

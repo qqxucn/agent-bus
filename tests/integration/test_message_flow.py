@@ -31,7 +31,12 @@ from urllib.request import Request, urlopen
 
 TEST_PORT = 14322
 BASE_URL = f"http://localhost:{TEST_PORT}"
-BUS_SERVER_DIR = Path("/tmp/agent-bus/packages/bus-server").resolve()
+# 基于脚本自身位置推导项目根目录
+# 脚本位置: tests/integration/test_message_flow.py
+# 项目根: 脚本位置向上两层
+_SCRIPT_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = _SCRIPT_DIR.parent.parent  # tests/../.. = project root
+BUS_SERVER_DIR = (PROJECT_ROOT / "packages" / "bus-server").resolve()
 DB_PATH = Path(tempfile.gettempdir()) / "test-bus-int.db"
 
 ENV = {

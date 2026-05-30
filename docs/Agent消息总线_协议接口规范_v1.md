@@ -1,7 +1,7 @@
 # Agent 消息总线 — 协议接口规范
 
 > **项目名称：** agent-bus
-> **版本基线：** agent-bus-channel-plugin v1.1.2（Python）/ claw-bus v1.1.2（TypeScript）
+> **版本基线：** bus-server v1.1.0 / typescript-sdk v2.0.0（claw-bus，OpenClaw原生插件）/
 > **文档状态：** 官方中文版（后续翻译以此版本为依据）
 > **最后更新：** 2026-05-30（v1 定稿）
 > **源码附录另见：**
@@ -809,7 +809,7 @@ WebSocket 断线后，插件自动触发重连，过程对 Agent 完全透明。
 ## 🧱 第四部分：SDK 快速接入指南
 
 > 适用范围：所有需要接入总线的 Agent（Hermes / OpenClaw 等）
-> 当前已实现的 SDK 版本：Python v1.1.2（已对齐测试）、TypeScript v1.1.2（claw-bus，已对齐审查）
+> 当前已实现的 SDK 版本：Python v1.1.2（通用SDK）、typescript-sdk v2.0.0（claw-bus v2，OpenClaw原生插件）
 
 本部分提供快速接入示例。各语言 SDK 的完整源码及详细配置说明见独立附录文件。
 
@@ -915,7 +915,7 @@ result = await plugin.send_file(
 ### 4.2 TypeScript 版快速接入（claw-bus）
 
 > claw-bus 是 TypeScript 版本的总线渠道插件，与 Python 版功能对等。
-> 版本：v1.1.2，由 OpenClaw 团队维护，已与 Python v1.1.2 完成协议对齐审查。
+> 版本：v2.0.0，由 OpenClaw 团队维护，原生插件架构。
 
 #### 4.2.1 安装
 
@@ -1487,8 +1487,9 @@ docker compose up -d
 | 组件 | 建议语言 | 说明 |
 |------|---------|------|
 | **总线服务端** | Node.js / TypeScript | 高并发 I/O 场景首选 |
-| **Python 插件** | Python 3.10+ | ✅ v1.1.2 |
-| **TypeScript 插件** | TypeScript 5+ | ✅ v1.1.2（claw-bus） |
+| **Python SDK** | Python 3.10+ | ✅ v1.1.2（通用SDK） |
+| **TypeScript SDK** | TypeScript 5+ | ✅ v2.0.0（claw-bus v2，OpenClaw原生插件） |
+| **Hermes 适配器** | Python 3.13+ | ✅ v2.0.0（Hermes BasePlatformAdapter） |
 | **管理面板** | Vue 3 / React + PWA | 不限 |
 | **中继层** | Node.js | 网络代理 |
 

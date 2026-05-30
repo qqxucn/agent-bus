@@ -5,8 +5,9 @@
 | 文件 | 说明 |
 |:-----|:-----|
 | `Agent消息总线_协议接口规范_v1.md` | 核心协议规范（中文版，三方审阅定稿） |
-| `源码附录_Python_v1.1.2.md` | Python SDK 完整源码附录 |
-| `源码附录_TypeScript_claw-bus_v1.1.2.md` | TypeScript SDK 完整源码附录 |
+
+> ​~~`源码附录_Python_v1.1.2.md`~~ — 已归档（v1.1.2 → v2.0.0，见仓库 `packages/` 和 `contrib/`）
+> ​~~`源码附录_TypeScript_claw-bus_v1.1.2.md`~~ — 已归档（v1.1.2 → v2.0.0，见仓库 `packages/typescript-sdk/`）
 
 ## 规范概览
 

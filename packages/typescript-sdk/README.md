@@ -1,95 +1,51 @@
 # claw-bus
 
-> TypeScript 版 Agent 总线渠道插件 — 让 Agent 通过统一接口接入私有消息总线
+OpenClaw 原生消息总线渠道插件 — 像飞书/微信一样在 `openclaw.json` 里配了就自动启动。
 
-**channel id：** `claw-bus`
+## 文件结构
 
-OpenClaw 生态的私有总线渠道插件，跟飞书、微信、QQ 等官方渠道平起平坐。
-
----
-
-## 安装
-
-```bash
-# 从 GitHub 安装
-npm install github:你的组织/claw-bus
-
-# 或者本地开发模式
-git clone https://github.com/你的组织/claw-bus.git
-cd claw-bus
-npm install
+```
+claw-bus/
+├── package.json              # OpenClaw 插件元数据
+├── openclaw.plugin.json      # 插件 manifest + 配置 schema
+├── index.ts                  # 主入口：defineChannelPluginEntry
+├── setup-entry.ts            # 轻量级设置入口：defineSetupPluginEntry
+├── src/
+│   ├── channel.ts            # ChannelPlugin 对象（createChatChannelPlugin）
+│   ├── index.ts              # 通用层：createBusPlugin 工厂
+│   ├── types.ts              # 核心类型定义
+│   ├── config.ts             # 配置校验 + 默认值
+│   ├── auth.ts               # Agent 注册 + Token 管理
+│   ├── message.ts            # 消息去重 + 会话上下文
+│   ├── ws-connection.ts      # WebSocket 连接（含心跳/重连）
+│   ├── poll-connection.ts    # HTTP 轮询连接
+│   └── file-transfer.ts      # 文件传输（沙箱/BASE64/共享目录）
+├── tsconfig.json
+└── types/
+    └── node-globals.d.ts
 ```
 
-## 配置
+## 快速开始
 
-在 `openclaw.json` 中添加：
+在 `openclaw.json` 中添加渠道配置：
 
-```json5
+```json
 {
-  "plugins": {
-    "entries": {
-      "claw-bus": { "enabled": true }
-    }
-  },
   "channels": {
     "claw-bus": {
-      "enabled": true,
-      "busUrl": "http://localhost:4322",
-      "busWsUrl": "ws://localhost:4322/ws",
-      "busToken": "你的Token（部署时填写）",
-      "agentId": "my-agent",
+      "busUrl": "http://47.104.247.64:4322",
+      "busWsUrl": "ws://47.104.247.64:4322/ws",
+      "busToken": "your-token-here",
+      "agentId": "小绿",
       "mode": "websocket",
-      "reconnectIntervalMs": 3000,
-      "dmPolicy": "open",
-      "markdown": { "tables": "bullets" }
+      "pollInterval": 3
     }
   }
 }
 ```
 
-**必填字段：** `busUrl`, `busToken`
+然后启动 OpenClaw，claw-bus 会自动连接。
 
-**选填字段：**
-| 字段 | 默认值 | 说明 |
-|------|--------|------|
-| `busWsUrl` | - | WS 模式必填 |
-| `agentId` | `"my-agent"` | 总线身份标识 |
-| `mode` | `"websocket"` | `websocket` 或 `poll` |
-| `pollInterval` | `3` | 轮询间隔（秒） |
-| `reconnectIntervalMs` | `3000` | 重连间隔（毫秒） |
+## TODO
 
-## 开发
-
-```bash
-# 类型检查
-npm run typecheck
-
-# 测试
-npm test
-
-# 构建
-npm run build
-```
-
-## 架构
-
-```
-claw-bus/
-├── src/
-│   ├── index.ts             ← 工厂函数 createBusPlugin()
-│   ├── types.ts             ← 核心类型定义
-│   ├── config.ts            ← 配置解析/校验
-│   ├── auth.ts              ← 认证/注册
-│   ├── message.ts           ← 消息去重/session 管理
-│   ├── ws-connection.ts     ← WebSocket 连接/心跳/重连
-│   ├── poll-connection.ts   ← HTTP 轮询
-│   └── file-transfer.ts     ← 文件传输
-├── channel-plugin-api.ts    ← OpenClaw 集成层
-├── runtime-api.ts           ← OpenClaw 设置入口
-├── openclaw.plugin.json     ← OpenClaw 插件清单
-└── test/                    ← 测试
-```
-
-## 协议
-
-MIT
+- [ ] 端到端联调（与 Hermes 原生插件双向收发消息）

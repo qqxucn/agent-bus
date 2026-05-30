@@ -64,11 +64,11 @@ export function createMessageController(
     }
   });
 
-  // GET /api/messages/inbox?agent_id=xxx&limit=20&offset=0&since=xxx
+  // GET /api/messages/inbox?limit=20&mark_read=true
   router.get('/inbox', (req, res) => {
     try {
-      const agentId = req.query.agent_id as string;
-      if (!agentId) {
+      const agentId = (req as any).agentId as string;
+      if (!agentId || agentId === '__admin__') {
         return res.json({ code: 1002, message: 'invalid_message', data: null } as ApiResponse);
       }
 
@@ -77,6 +77,7 @@ export function createMessageController(
         limit: parseInt(req.query.limit as string, 10) || 50,
         offset: parseInt(req.query.offset as string, 10) || 0,
         since: req.query.since as string | undefined,
+        mark_read: req.query.mark_read === 'true',
       };
 
       const inbox = messageStore.fetchInbox(query);

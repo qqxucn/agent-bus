@@ -1,23 +1,39 @@
 {
   "name": "@claw-bus/claw-bus",
-  "version": "1.1.2",
+  "version": "2.0.0",
   "private": false,
   "type": "module",
-  "description": "TypeScript 版 Agent 总线渠道插件 — 让 Agent 通过统一接口接入私有消息总线",
+  "description": "OpenClaw \u539f\u751f\u6d88\u606f\u603b\u7ebf\u6e20\u9053\u63d2\u4ef6 \u2014 \u50cf\u98de\u4e66/\u5fae\u4fe1\u4e00\u6837\u5728 openclaw.json \u91cc\u914d\u4e86\u5c31\u81ea\u52a8\u542f\u52a8",
   "license": "MIT",
-  "main": "./src/index.ts",
   "openclaw": {
     "extensions": [
-      "./channel-plugin-api.ts"
+      "./index.ts"
     ],
-    "setupEntry": "./runtime-api.ts",
+    "setupEntry": "./setup-entry.ts",
     "channel": {
       "id": "claw-bus",
       "label": "Claw Bus",
-      "selectionLabel": "Claw Bus（私有总线）",
-      "detailLabel": "私有 Agent 消息总线",
-      "blurb": "通过自己的 Agent Bus 收发消息，与飞书/微信等渠道平起平坐。",
-      "markdownCapable": true
+      "selectionLabel": "Claw Bus\uff08\u79c1\u6709\u603b\u7ebf\uff09",
+      "detailLabel": "\u79c1\u6709 Agent \u6d88\u606f\u603b\u7ebf",
+      "blurb": "\u901a\u8fc7\u81ea\u5df1\u7684 Agent Bus \u6536\u53d1\u6d88\u606f\uff0c\u4e0e\u98de\u4e66/\u5fae\u4fe1\u7b49\u6e20\u9053\u5e73\u8d77\u5e73\u5750\u3002",
+      "markdownCapable": true,
+      "quickstartAllowFrom": true,
+      "exposure": {
+        "configured": true,
+        "setup": true,
+        "docs": true
+      }
+    },
+    "startup": {
+      "deferConfiguredChannelFullLoadUntilAfterListen": true
+    },
+    "compat": {
+      "pluginApi": ">=2026.5.20",
+      "minGatewayVersion": "2026.5.20"
+    },
+    "build": {
+      "openclawVersion": "2026.5.20",
+      "pluginSdkVersion": "2026.5.20"
     }
   },
   "scripts": {
@@ -33,6 +49,7 @@
     "vitest": "^2.0.0"
   },
   "dependencies": {
-    "ws": "^8.21.0"
+    "ws": "^8.21.0",
+    "openclaw": "2026.5.20"
   }
 }

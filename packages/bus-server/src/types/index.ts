@@ -1,6 +1,6 @@
 // ========================================================
 // Agent 消息总线 — 总线服务端 共享类型定义
-// 版本: v1.0
+// 版本: v1.1
 // ========================================================
 
 // ========== 基本类型 ==========
@@ -105,10 +105,12 @@ export interface SendMessageRequest {
 }
 
 export interface InboxQuery {
-  agent_id: string;
+  agent_id?: string;
   limit?: number;
   offset?: number;
   since?: string;
+  /** 拉取后自动标记为已读（默认 false） */
+  mark_read?: boolean;
 }
 
 export interface InboxResponse {

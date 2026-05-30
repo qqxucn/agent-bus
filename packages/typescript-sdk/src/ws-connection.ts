@@ -199,7 +199,10 @@ export class WsConnection {
     const frame = {
       ws_type: 'message',
       request_id: requestId,
-      payload: msg as unknown as Record<string, unknown>,
+      payload: {
+        ...msg,
+        from: this.auth.agentId,
+      } as Record<string, unknown>,
     };
 
     try {

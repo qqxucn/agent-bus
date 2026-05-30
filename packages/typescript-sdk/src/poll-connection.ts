@@ -148,15 +148,30 @@ export class PollConnection {
         // 成功后重置重试计数
         retries = 0;
 
-        const data = (await res.json()) as { messages?: BusMessage[]; has_more?: boolean; next_page_token?: string };
-        const messages: BusMessage[] = data.messages || [];
+        const raw = (await res.json()) as Record<string, unknown>;
+
+        // 兼容多种收件箱响应格式：{ messages: [] } / { data: { messages: [] } } / { data: [] } / 数组
+        let messages: BusMessage[] = [];
+        const data = raw.data && typeof raw.data === 'object'
+          ? (raw.data as Record<string, unknown>)
+          : raw;
+
+        if (Array.isArray(data)) {
+          messages = data as BusMessage[];
+        } else if (Array.isArray(raw)) {
+          messages = raw as BusMessage[];
+        } else if (data && 'messages' in data && Array.isArray(data.messages)) {
+          messages = data.messages as BusMessage[];
+        } else if ('messages' in raw && Array.isArray(raw.messages)) {
+          messages = raw.messages as BusMessage[];
+        }
 
         for (const msg of messages) {
           await this.messageMgr.handleMessage(msg);
         }
 
-        hasMore = data.has_more === true;
-        pageToken = data.next_page_token;
+        hasMore = (data?.has_more === true) || (raw?.has_more === true);
+        pageToken = (data?.next_page_token as string) || (raw?.next_page_token as string) || undefined;
 
         if (messages.length === 0) {
           hasMore = false;

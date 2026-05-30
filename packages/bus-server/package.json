@@ -1,8 +1,8 @@
 {
   "name": "@agent-bus/bus-server",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
-  "description": "Agent 消息总线 — 总线服务端（消息路由 + WebSocket 网关 + Agent 管理）",
+  "description": "Agent \u6d88\u606f\u603b\u7ebf \u2014 \u603b\u7ebf\u670d\u52a1\u7aef\uff08\u6d88\u606f\u8def\u7531 + WebSocket \u7f51\u5173 + Agent \u7ba1\u7406\uff09",
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",

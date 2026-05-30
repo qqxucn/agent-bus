@@ -1,0 +1,10 @@
+=== Agent Bus 版本规范 ===
+
+总线协议版本: v1.1
+最后对齐日期: 2026-05-30
+
+组件版本:
+  bus-server      v1.1.0    (packages/bus-server/)
+  typescript-sdk  v2.0.0    (packages/typescript-sdk/) — OpenClaw claw-bus 原生插件
+  python-sdk      v1.1.2    (packages/python-sdk/) — 通用Python SDK（无框架依赖）
+  hermes-adapter  v2.0.0    (contrib/hermes-adapter/) — Hermes BasePlatformAdapter 原生插件

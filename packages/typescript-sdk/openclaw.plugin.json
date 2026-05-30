@@ -1,8 +1,8 @@
 {
   "id": "claw-bus",
-  "activation": {
-    "onStartup": true
-  },
+  "kind": "channel",
+  "name": "Claw Bus",
+  "description": "私有 Agent 消息总线渠道插件",
   "channels": ["claw-bus"],
   "configSchema": {
     "type": "object",
@@ -11,12 +11,12 @@
       "busUrl": {
         "type": "string",
         "description": "Agent Bus HTTP API 地址",
-        "examples": ["http://localhost:4322"]
+        "examples": ["http://47.104.247.64:4322"]
       },
       "busWsUrl": {
         "type": "string",
         "description": "Agent Bus WebSocket 地址（WS 模式必填）",
-        "examples": ["ws://localhost:4322/ws"]
+        "examples": ["ws://47.104.247.64:4322/ws"]
       },
       "busToken": {
         "type": "string",
@@ -46,6 +46,25 @@
         "minimum": 1000,
         "maximum": 60000,
         "description": "断线重连间隔（毫秒）"
+      },
+      "maxReconnectAttempts": {
+        "type": "integer",
+        "default": 10,
+        "minimum": 1,
+        "maximum": 100,
+        "description": "最大重连次数"
+      },
+      "maxFileSizeMb": {
+        "type": "integer",
+        "default": 10,
+        "minimum": 1,
+        "maximum": 500,
+        "description": "文件大小上限（MB）"
+      },
+      "allowFrom": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "允许发送消息的 Agent ID 白名单"
       }
     },
     "required": ["busUrl", "busToken"]
@@ -70,33 +89,53 @@
           },
           "agentId": {
             "type": "string",
-            "default": "my-agent"
+            "default": "my-agent",
+            "description": "本 Agent 在总线上的身份标识"
           },
           "mode": {
             "type": "string",
             "enum": ["websocket", "poll"],
-            "default": "websocket"
+            "default": "websocket",
+            "description": "连接模式"
           },
           "pollInterval": {
             "type": "integer",
-            "default": 3
+            "default": 3,
+            "description": "轮询间隔（秒）"
           },
           "reconnectIntervalMs": {
             "type": "integer",
-            "default": 3000
+            "default": 3000,
+            "description": "重连间隔（毫秒）"
+          },
+          "maxReconnectAttempts": {
+            "type": "integer",
+            "default": 10,
+            "maximum": 100
+          },
+          "maxFileSizeMb": {
+            "type": "integer",
+            "default": 10,
+            "maximum": 500
+          },
+          "allowFrom": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Agent 白名单"
           },
           "dmPolicy": {
             "type": "string",
             "enum": ["open", "allowlist", "pairing", "disabled"],
             "default": "open",
-            "description": "私聊策略"
+            "description": "私聊策略（open=开放, allowlist=白名单, pairing=配对验证, disabled=关闭）"
           },
           "markdown": {
             "type": "object",
             "properties": {
               "tables": {
                 "type": "string",
-                "enum": ["off", "bullets", "code", "block"]
+                "enum": ["off", "bullets", "code", "block"],
+                "default": "code"
               }
             },
             "additionalProperties": false
@@ -105,19 +144,35 @@
         "required": ["busUrl", "busToken"]
       },
       "label": "Claw Bus",
-      "description": "私有 Agent 消息总线渠道插件",
+      "description": "私有 Agent 消息总线渠道 — 像飞书/微信一样自动启动",
       "uiHints": {
         "": {
           "label": "Claw Bus",
           "help": "通过私有 Agent Bus 收发消息，跟飞书/微信平起平坐。"
         },
+        "busUrl": {
+          "label": "总线 API 地址",
+          "help": "Agent Bus 的 HTTP API 地址，例如 http://47.104.247.64:4322"
+        },
+        "busWsUrl": {
+          "label": "总线 WebSocket 地址",
+          "help": "WebSocket 模式必填，例如 ws://47.104.247.64:4322/ws"
+        },
         "busToken": {
           "label": "Bus Token",
-          "help": "总线认证 Token，部署时填写"
+          "help": "总线认证 Token，部署时填写，不进代码仓库"
+        },
+        "agentId": {
+          "label": "Agent ID",
+          "help": "本 Agent 在总线上的身份标识"
+        },
+        "mode": {
+          "label": "连接模式",
+          "help": "websocket（推荐，实时双向）或 poll（HTTP 轮询）"
         },
         "dmPolicy": {
           "label": "私聊策略",
-          "help": "建议 "open" 以便 Agent 间自由通信"
+          "help": "Agent 间通信建议 open，生产环境可限制白名单"
         }
       }
     }

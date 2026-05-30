@@ -5,6 +5,11 @@
  * 通用层，不依赖 OpenClaw SDK。
  */
 
+/** 总线协议版本（两端共用，用于对齐排查） */
+export const AGENT_BUS_PROTOCOL_VERSION = '1.1';
+/** 实现版本 */
+export const AGENT_BUS_IMPLEMENTATION_VERSION = '2.0.0';
+
 import type { BusChannelConfig, BusChannelPlugin, BusMessage, OutboundMessage, SendResult } from './types';
 import { ConfigManager } from './config';
 import { AuthManager } from './auth';

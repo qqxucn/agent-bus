@@ -70,8 +70,8 @@ export class AuthManager {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        id: this.agentId,
-        name: this.agentId,
+        agent_id: this.agentId,
+        display_name: this.agentId,
         token: this._token,
       }),
     });

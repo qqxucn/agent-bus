@@ -16,6 +16,6 @@
     "declarationMap": true,
     "sourceMap": true
   },
-  "include": ["src/**/*.ts", "types/**/*.ts", "channel-plugin-api.ts", "runtime-api.ts"],
+  "include": ["src/**/*.ts", "index.ts", "setup-entry.ts", "types/**/*.ts"],
   "exclude": ["node_modules", "dist", "test"]
 }

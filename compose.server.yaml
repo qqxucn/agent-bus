@@ -1,0 +1,75 @@
+# =====================================================
+# Agent 消息总线 — 服务端一键部署
+# 在 VPS/服务器上启动总线、中继和管理面板
+#
+# 使用方式（在 VPS 上）：
+#   # 克隆仓库后，一条命令启动全部服务
+#   docker compose -f compose.server.yaml up -d
+#
+# 可选安全增强（创建 .env.server 文件）：
+#   ADMIN_TOKEN=your_secure_admin_token
+#   AGENT_TOKEN_SECRET=agent_registration_secret
+#   RELAY_TOKEN=relay_access_token
+# =====================================================
+
+services:
+
+  # ── 总线服务端（含管理面板） ──
+  bus-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: agent-bus/bus-server:latest
+    container_name: agent-bus-server
+    ports:
+      - "4322:4322"
+    environment:
+      - ADMIN_TOKEN=${ADMIN_TOKEN:-admin123}
+      - AGENT_TOKEN_SECRET=${AGENT_TOKEN_SECRET:-agent-secret}
+      - HTTP_PORT=4322
+      - DB_PATH=/app/data/bus.db
+      - PANEL_FRONTEND_PATH=/app/panel
+    volumes:
+      - bus-data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4322/api/v1/panel/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ── 中继层（可选） ──
+  # 当内网 Agent 需要通过中继访问总线时启用此服务。
+  # 如果所有 Agent 都能直连 bus-server，可以不启动 relay-server。
+  relay-server:
+    build:
+      context: ./packages/relay-server
+    image: agent-bus/relay-server:latest
+    container_name: agent-bus-relay
+    ports:
+      - "4324:4324"
+    environment:
+      - RELAY_PORT=4324
+      - LISTEN_HOST=0.0.0.0
+      - BUS_HOST=bus-server
+      - BUS_PORT=4322
+      - RELAY_TOKEN=${RELAY_TOKEN:-}
+      - MODE=poll
+    restart: unless-stopped
+    depends_on:
+      - bus-server
+
+  # ── 面板独立构建（仅开发者需要时使用） ──
+  # docker compose -f compose.server.yaml run --rm panel-build
+  panel-build:
+    build:
+      context: ./panel-frontend
+      target: export
+    image: agent-bus/panel-export:latest
+    container_name: agent-bus-panel-build
+    profiles:
+      - build-only
+
+volumes:
+  bus-data:
+    driver: local

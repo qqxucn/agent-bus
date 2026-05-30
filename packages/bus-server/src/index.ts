@@ -44,8 +44,10 @@ async function main() {
   const panelRoutes = createPanelRoutes(agentStore, messageStore, core.pool);
   app.use('/api/v1/panel', adminAuth, panelRoutes);
 
-  // Panel frontend static files (from panel-frontend/)
-  const panelFrontendPath = path.join(__dirname, '..', '..', 'panel-frontend');
+  // Panel frontend static files
+  // Default: dev path (monorepo), override via PANEL_FRONTEND_PATH env for Docker
+  const panelFrontendPath = process.env.PANEL_FRONTEND_PATH
+    || path.join(__dirname, '..', '..', 'panel-frontend');
   app.use('/panel', express.static(panelFrontendPath));
 
   // 6. Create HTTP server and attach WS

@@ -1,0 +1,125 @@
+{
+  "id": "claw-bus",
+  "activation": {
+    "onStartup": true
+  },
+  "channels": ["claw-bus"],
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "busUrl": {
+        "type": "string",
+        "description": "Agent Bus HTTP API 地址",
+        "examples": ["http://localhost:4322"]
+      },
+      "busWsUrl": {
+        "type": "string",
+        "description": "Agent Bus WebSocket 地址（WS 模式必填）",
+        "examples": ["ws://localhost:4322/ws"]
+      },
+      "busToken": {
+        "type": "string",
+        "description": "Bus 认证 Token（部署时填写，不进代码仓库）"
+      },
+      "agentId": {
+        "type": "string",
+        "default": "my-agent",
+        "description": "本 Agent 在总线上的身份标识"
+      },
+      "mode": {
+        "type": "string",
+        "enum": ["websocket", "poll"],
+        "default": "websocket",
+        "description": "连接模式"
+      },
+      "pollInterval": {
+        "type": "integer",
+        "default": 3,
+        "minimum": 1,
+        "maximum": 60,
+        "description": "轮询间隔（秒，poll 模式有效）"
+      },
+      "reconnectIntervalMs": {
+        "type": "integer",
+        "default": 3000,
+        "minimum": 1000,
+        "maximum": 60000,
+        "description": "断线重连间隔（毫秒）"
+      }
+    },
+    "required": ["busUrl", "busToken"]
+  },
+  "channelConfigs": {
+    "claw-bus": {
+      "schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "busUrl": {
+            "type": "string",
+            "description": "Agent Bus HTTP API 地址"
+          },
+          "busWsUrl": {
+            "type": "string",
+            "description": "Agent Bus WebSocket 地址"
+          },
+          "busToken": {
+            "type": "string",
+            "description": "Bus 认证 Token"
+          },
+          "agentId": {
+            "type": "string",
+            "default": "my-agent"
+          },
+          "mode": {
+            "type": "string",
+            "enum": ["websocket", "poll"],
+            "default": "websocket"
+          },
+          "pollInterval": {
+            "type": "integer",
+            "default": 3
+          },
+          "reconnectIntervalMs": {
+            "type": "integer",
+            "default": 3000
+          },
+          "dmPolicy": {
+            "type": "string",
+            "enum": ["open", "allowlist", "pairing", "disabled"],
+            "default": "open",
+            "description": "私聊策略"
+          },
+          "markdown": {
+            "type": "object",
+            "properties": {
+              "tables": {
+                "type": "string",
+                "enum": ["off", "bullets", "code", "block"]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": ["busUrl", "busToken"]
+      },
+      "label": "Claw Bus",
+      "description": "私有 Agent 消息总线渠道插件",
+      "uiHints": {
+        "": {
+          "label": "Claw Bus",
+          "help": "通过私有 Agent Bus 收发消息，跟飞书/微信平起平坐。"
+        },
+        "busToken": {
+          "label": "Bus Token",
+          "help": "总线认证 Token，部署时填写"
+        },
+        "dmPolicy": {
+          "label": "私聊策略",
+          "help": "建议 "open" 以便 Agent 间自由通信"
+        }
+      }
+    }
+  }
+}

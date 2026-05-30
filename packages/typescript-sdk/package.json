@@ -1,0 +1,38 @@
+{
+  "name": "@claw-bus/claw-bus",
+  "version": "1.1.2",
+  "private": false,
+  "type": "module",
+  "description": "TypeScript 版 Agent 总线渠道插件 — 让 Agent 通过统一接口接入私有消息总线",
+  "license": "MIT",
+  "main": "./src/index.ts",
+  "openclaw": {
+    "extensions": [
+      "./channel-plugin-api.ts"
+    ],
+    "setupEntry": "./runtime-api.ts",
+    "channel": {
+      "id": "claw-bus",
+      "label": "Claw Bus",
+      "selectionLabel": "Claw Bus（私有总线）",
+      "detailLabel": "私有 Agent 消息总线",
+      "blurb": "通过自己的 Agent Bus 收发消息，与飞书/微信等渠道平起平坐。",
+      "markdownCapable": true
+    }
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/ws": "^8.18.1",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  },
+  "dependencies": {
+    "ws": "^8.21.0"
+  }
+}

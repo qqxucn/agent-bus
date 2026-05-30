@@ -1,6 +1,14 @@
-import type { BusServerConfig } from '../types/index.js';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import type { BusServerConfig } from './types/index.js';
 
 export function loadConfig(): BusServerConfig {
+  // 尝试加载项目根目录的 .env.server
+  const __dirname = path.dirname(fileURLToPath(import.meta.url));
+  const envPath = path.resolve(__dirname, '../../..', '.env.server');
+  dotenv.config({ path: envPath });
+
   return {
     httpPort: parseInt(process.env.HTTP_PORT ?? '4322', 10),
     dbPath: process.env.DB_PATH ?? './data/bus.db',

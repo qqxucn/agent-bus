@@ -20,6 +20,8 @@ export interface SystemStats {
   online_agents: number;
   total_messages: number;
   messages_today: number;
+  total_files: number;
+  storage_used_mb: number;
   uptime_seconds: number;
   version: string;
 }

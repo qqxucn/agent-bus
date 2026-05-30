@@ -137,6 +137,7 @@ export interface SystemStats {
   total_messages: number;
   total_files: number;
   storage_used_mb: number;
+  messages_today: number;
   uptime_seconds: number;
   version: string;
 }
@@ -176,6 +177,16 @@ export interface MessageSearchResponse {
   total: number;
   page: number;
   page_size: number;
+}
+
+// ========== 文件 ==========
+
+export interface FileInfo {
+  file_id: string;
+  file_name: string;
+  file_size: number;
+  uploaded_by: string;
+  uploaded_at: string;
 }
 
 // ========== 配置 ==========

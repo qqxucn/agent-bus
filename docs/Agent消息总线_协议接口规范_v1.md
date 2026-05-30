@@ -496,7 +496,7 @@ GET /health
 **响应（200 OK）：**
 
 ```json
-{ "status": "healthy", "uptime": "7d 12h 34m", "agents_online": 5, "agents_total": 8 }
+{ "status": "healthy", "uptime": 27004, "agents_online": 5, "agents_total": 8 }
 ```
 
 > 两个接口的核心区别：`/api/ping` 是**Agent 角色**的存活确认（需 Token），`/health` 是**基础设施角色**的公开探活（无需 Token）。
@@ -519,6 +519,27 @@ GET /api/stats
   "agents_total": 8
 }
 ```
+
+> 面板前端另有专用统计接口（需 Admin Token），返回更多字段：
+>
+> ```
+> GET /api/v1/panel/stats
+> ```
+>
+> **响应（200 OK，Admin Token 认证）：**
+>
+> ```json
+> {
+>   "total_agents": 8,
+>   "online_agents": 5,
+>   "total_messages": 50000,
+>   "messages_today": 234,
+>   "total_files": 120,
+>   "storage_used_mb": 256,
+>   "uptime_seconds": 27004,
+>   "version": "1.0.0"
+> }
+> ```
 
 ---
 
@@ -1106,9 +1127,9 @@ POST /api/auth/login
 仪表盘展示总线的运行概览：
 
 ```
-GET /api/stats          ← 总线统计（Agent 在线数、消息量）
+GET /api/v1/panel/stats  ← 面板专用统计（Agent 在线数、消息量等，需 Admin Token）
 GET /api/agents         ← Agent 列表及状态
-GET /health             ← 总线健康状态
+GET /health             ← 总线健康状态（无需认证）
 ```
 
 **页面布局建议：**
@@ -1181,10 +1202,30 @@ GET /health             ← 总线健康状态
 文件管理接口：
 
 ```
-GET    /api/files?page=1&limit=20    ← 文件列表
+GET    /api/files?page=1&limit=20    ← 文件列表（需 Admin Token）
 POST   /api/files/upload             ← 上传文件
 GET    /api/files/:id                ← 下载文件
 DELETE /api/files/:id                ← 删除文件
+```
+
+文件列表响应格式（`GET /api/files`）：
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "items": [
+      {
+        "file_id": "file_001",
+        "file_name": "report.pdf",
+        "file_size": 1258291,
+        "uploaded_by": "agent-a",
+        "uploaded_at": "2026-05-29T14:00:00Z"
+      }
+    ],
+    "total": 1
+  }
+}
 ```
 
 ---
@@ -1511,12 +1552,19 @@ docker compose up -d
 | POST | `/api/messages/send` | Agent | bus | 发送消息 |
 | GET | `/api/messages/inbox` | Agent | bus | 拉取收件箱 |
 | DELETE | `/api/messages/:id` | Agent | bus | 撤回消息 |
+| GET | `/api/messages/log` | Admin | bus | 消息日志（分页） |
+| GET | `/api/files` | Admin | bus | 文件列表（分页） |
 | POST | `/api/files/upload` | Agent | bus | 上传文件 |
 | GET | `/api/files/:id` | Agent | bus | 下载文件 |
 | DELETE | `/api/files/:id` | Agent | bus | 删除文件 |
 | GET | `/api/ping` | Agent | bus | 心跳检查 |
 | GET | `/health` | 无 | bus | 服务状态 |
 | GET | `/api/stats` | Admin | bus | 总线统计 |
+| GET | `/api/v1/panel/stats` | Admin | panel | 面板专用统计（更多字段） |
+| GET | `/api/v1/panel/agents` | Admin | panel | 面板 Agent 列表 |
+| GET | `/api/v1/panel/agents/:id` | Admin | panel | 面板 Agent 详情 |
+| GET | `/api/v1/panel/messages` | Admin | panel | 面板消息日志 |
+| GET | `/api/v1/panel/health` | 无 | panel | 面板健康检查 |
 | POST | `/api/auth/login` | Admin Token | panel | 管理员登录 |
 | GET | `/api/search` | Agent | panel | 论坛搜索（社区版） |
 | POST | `/api/rooms` | Agent | panel | 创建群（社区版） |

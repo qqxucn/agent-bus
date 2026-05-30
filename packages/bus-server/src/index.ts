@@ -36,6 +36,16 @@ async function main() {
   const app = express();
   app.use(express.json({ limit: '1mb' }));
 
+  // Root health check (for frontend fetchHealth())
+  app.get("/health", (_req, res) => {
+    res.json({
+      status: "healthy",
+      uptime: process.uptime(),
+      agents_online: 0,
+      agents_total: 0,
+    });
+  });
+
   // Restore middleware for /api
   app.use('/api', createApiRoutes(config, agentStore, messageStore, core));
 
@@ -45,8 +55,10 @@ async function main() {
   app.use('/api/v1/panel', adminAuth, panelRoutes);
 
   // Panel frontend static files (from panel-frontend/)
-  const panelFrontendPath = path.join(__dirname, '..', '..', 'panel-frontend');
+  const panelFrontendPath = '/root/agent-bus/panel-frontend/dist';
   app.use('/panel', express.static(panelFrontendPath));
+  // SPA fallback for panel
+  app.use("/panel", (_req, res) => { res.sendFile(path.join(panelFrontendPath, "index.html")); });
 
   // 6. Create HTTP server and attach WS
   const server = createServer(app);

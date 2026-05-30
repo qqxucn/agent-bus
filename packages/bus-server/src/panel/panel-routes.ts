@@ -21,6 +21,8 @@ export function createPanelRoutes(
         online_agents: pool.getConnectionCount(),
         total_messages: messageStore.getMessageCount(),
         messages_today: messageStore.getTodayCount(),
+        total_files: messageStore.getFileCount(),
+        storage_used_mb: 0,
         uptime_seconds: Math.floor((Date.now() - START_TIME) / 1000),
         version: '1.0.0',
       };

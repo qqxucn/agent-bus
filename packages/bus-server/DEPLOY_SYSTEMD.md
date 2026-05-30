@@ -94,7 +94,9 @@ systemctl stop agent-bus
 ## 验证部署
 
 ```bash
-# 健康检查
+# 健康检查（两个端点均可）
+curl http://localhost:4322/health
+# 应返回: {"status":"healthy","uptime":12345,...}
 curl http://localhost:4322/api/health
 # 应返回: {"code":0,"data":{"status":"healthy",...}}
 

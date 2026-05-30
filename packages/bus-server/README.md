@@ -26,9 +26,12 @@ npm start       # 生产运行
 | POST | `/api/messages/send` | 发送消息 |
 | GET | `/api/messages/inbox` | 收取消息 |
 | POST | `/api/messages/search` | 搜索消息 |
+| GET | `/api/messages/log` | 消息日志（需 Admin Token） |
+| GET | `/api/files` | 文件列表（需 Admin Token） |
 | GET | `/api/files/upload` | 上传文件 |
 | GET | `/api/files/:id` | 下载文件 |
 | GET | `/api/stats` | 总线统计 |
+| GET | `/api/v1/panel/stats` | 面板统计（需 Admin Token，更多字段） |
 | GET | `/health` | 健康检查 |
 | WS | `/ws` | WebSocket 实时通信 |
 

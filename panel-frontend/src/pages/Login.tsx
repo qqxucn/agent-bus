@@ -31,9 +31,13 @@ export function LoginPage({ onLogin }: Props) {
         localStorage.removeItem('admin_token');
         setError('Token 无效，请检查后重试');
       }
-    } catch {
+    } catch (err) {
       localStorage.removeItem('admin_token');
-      setError('总线服务不可达，请确认服务已启动');
+      if (err instanceof TypeError) {
+        setError('总线服务不可达，请确认服务已启动');
+      } else {
+        setError(`登录失败: ${err instanceof Error ? err.message : '未知错误'}`);
+      }
     } finally {
       setLoading(false);
     }

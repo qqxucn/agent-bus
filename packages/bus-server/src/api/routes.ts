@@ -1,7 +1,7 @@
 // ===== api/routes.ts — 注册所有 REST 路由 =====
 
 import { Router } from 'express';
-import type { BusServerConfig } from '../types/index.js';
+import type { BusServerConfig, ApiResponse, MessageLogQuery, FileInfo } from '../types/index.js';
 import type { AgentStore } from '../storage/agent-store.js';
 import type { MessageStore } from '../storage/message-store.js';
 import type { Core } from '../core/index.js';
@@ -56,10 +56,58 @@ export function createApiRoutes(
   const agentController = createAgentController(config, agentStore);
   router.use('/agents', agentController);
 
-  // Message routes (require auth)
-  const msgAuth = requireAuth(config, agentStore);
+  // Authenticated routes
+  const auth = requireAuth(config, agentStore);
   const messageController = createMessageController(config, messageStore, core.provider);
-  router.use('/messages', msgAuth, messageController);
+
+  // GET /api/messages/log — 消息日志（需认证，在 /messages 挂载之前注册，避免被子路由拦截）
+  router.get('/messages/log', auth, (req, res) => {
+    try {
+      const query: MessageLogQuery = {
+        agent_id: req.query.agent_id as string | undefined,
+        limit: parseInt(req.query.limit as string, 10) || 50,
+        offset: parseInt(req.query.offset as string, 10) || 0,
+        since: req.query.since as string | undefined,
+        until: req.query.until as string | undefined,
+      };
+      const entries = messageStore.queryMessages(query);
+      const total = messageStore.getMessageCount();
+      return res.json({
+        code: 0, message: 'success',
+        data: { items: entries, total },
+      } as ApiResponse<{ items: typeof entries; total: number }>);
+    } catch (err) {
+      return res.json({ code: 9000, message: 'internal_error', data: null } as ApiResponse);
+    }
+  });
+
+  // 消息路由（包含 /send, /inbox, /search 等子路由）
+  router.use('/messages', auth, messageController);
+
+  router.get('/files', auth, (req, res) => {
+    try {
+      const page = parseInt(req.query.page as string, 10) || 1;
+      const limit = parseInt(req.query.limit as string, 10) || 20;
+      const result = messageStore.searchMessages({
+        type: 'file',
+        page,
+        page_size: limit,
+      });
+      const items: FileInfo[] = result.messages.map(m => ({
+        file_id: m.file_id || m.message_id,
+        file_name: m.file_name || '未知文件',
+        file_size: m.file_size || 0,
+        uploaded_by: m.from_agent,
+        uploaded_at: m.sent_at,
+      }));
+      return res.json({
+        code: 0, message: 'success',
+        data: { items, total: result.total },
+      } as ApiResponse<{ items: FileInfo[]; total: number }>);
+    } catch (err) {
+      return res.json({ code: 9000, message: 'internal_error', data: null } as ApiResponse);
+    }
+  });
 
   // Error handler
   router.use(errorHandler);

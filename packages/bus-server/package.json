@@ -2,28 +2,32 @@
   "name": "@agent-bus/bus-server",
   "version": "1.1.0",
   "type": "module",
-  "description": "Agent \u6d88\u606f\u603b\u7ebf \u2014 \u603b\u7ebf\u670d\u52a1\u7aef\uff08\u6d88\u606f\u8def\u7531 + WebSocket \u7f51\u5173 + Agent \u7ba1\u7406\uff09",
+  "description": "Agent 消息总线 — 总线服务端（消息路由 + WebSocket 网关 + Agent 管理）",
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "test": "vitest run"
+    "test": "vitest run",
+    "start:dev": "tsx src/index.ts",
+    "start:env": "node -r dotenv/config dist/index.js"
   },
   "dependencies": {
-    "express": "^5.0.0",
-    "ws": "^8.0.0",
-    "sql.js": "^1.0.0",
     "cors": "^2.8.5",
-    "uuid": "^9.0.0"
+    "dotenv": "^17.4.2",
+    "express": "^5.0.0",
+    "sql.js": "^1.0.0",
+    "uuid": "^9.0.0",
+    "ws": "^8.0.0"
   },
   "devDependencies": {
-    "typescript": "^5.4.0",
-    "tsx": "^4.0.0",
-    "vitest": "^1.6.0",
-    "@types/express": "^4.0.0",
-    "@types/ws": "^8.0.0",
     "@types/cors": "^2.8.0",
+    "@types/express": "^4.0.0",
     "@types/node": "^20.0.0",
-    "@types/uuid": "^9.0.0"
+    "@types/sql.js": "^1.4.11",
+    "@types/uuid": "^9.0.0",
+    "@types/ws": "^8.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.0"
   }
 }

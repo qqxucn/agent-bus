@@ -39,7 +39,9 @@ async function handleResponse<T>(res: Response): Promise<T> {
     // 401 特殊处理：token 无效
     if (res.status === 401) {
       localStorage.removeItem('admin_token');
-      window.location.hash = '#/login';
+      if (!window.location.hash.startsWith('#/login')) {
+        window.location.hash = '#/login';
+      }
       throw new Error('认证已过期，请重新登录');
     }
     const body = await res.text();
@@ -66,7 +68,7 @@ export async function fetchHealth(): Promise<HealthResponse> {
 
 /** 获取总线统计 */
 export async function fetchStats(): Promise<SystemStats> {
-  const res = await fetch(`${CONFIG.busUrl}/api/stats`, {
+  const res = await fetch(`${CONFIG.busUrl}/api/v1/panel/stats`, {
     method: 'GET',
     headers: headers(),
   });
@@ -94,8 +96,11 @@ export async function fetchAgentDetail(agentId: string): Promise<AgentListItem> 
 /** 验证 admin_token 是否有效 */
 export async function verifyToken(): Promise<boolean> {
   try {
-    await fetchStats();
-    return true;
+    const res = await fetch(`${CONFIG.busUrl}/api/v1/panel/stats`, {
+      method: 'GET',
+      headers: headers(),
+    });
+    return res.ok;
   } catch {
     return false;
   }

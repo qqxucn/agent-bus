@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-bus-channel-plugin"
+version = "1.1.2"
+description = "统一的 Agent 总线渠道插件 — 支持 WebSocket 和 HTTP 轮询双模式"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "小和", email = "xiaohe@agent-bus.dev"},
+]
+keywords = ["agent", "bus", "websocket", "messaging", "ai"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Communications :: Chat",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+dependencies = [
+    # 核心依赖只有标准库
+    # websockets 库是可选依赖（WS模式需要）
+    # PyYAML 是可选依赖（YAML配置需要）
+]
+
+[project.optional-dependencies]
+websocket = ["websockets>=12"]
+yaml = ["pyyaml>=6"]
+all = ["agent-bus-channel-plugin[websocket,yaml]"]
+
+[project.urls]
+Homepage = "https://github.com/your-org/agent-bus-channel-plugin"
+Repository = "https://github.com/your-org/agent-bus-channel-plugin.git"
+
+[tool.setuptools.packages.find]
+include = ["bus_channel*"]
+
+[tool.setuptools.package-data]
+bus_channel = ["py.typed"]

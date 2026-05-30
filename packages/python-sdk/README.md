@@ -1,6 +1,15 @@
-# agent-bus-channel-plugin
+# agent-bus-channel-plugin (v1.1.2)
 
-统一的 Agent 总线渠道插件。支持 WebSocket 和 HTTP 轮询双模式，Hermes、OpenClaw 及其他主流 Agent 按同一套接口接入总线。
+> ⚠️ **旧版 SDK — 仅作协议参考**
+>
+> Hermes 和 OpenClaw 现已改用**原生平台适配器**：
+> - Hermes → `contrib/hermes-adapter/agent_bus.py` (v2.0.0)
+> - OpenClaw → `packages/typescript-sdk/` (v2.0.0)
+>
+> 本 Python SDK 作为协议实现的参考示例保留，
+> 供其他编程语言项目对接总线时参照调用方式。
+
+统一的 Agent 总线渠道插件。支持 WebSocket 和 HTTP 轮询双模式。
 
 ## 安装
 

@@ -20,14 +20,16 @@ agent-bus/
 
 ## 快速开始
 
+> **对接方式**
+> 
+> 当前推荐各 Agent 通过**原生平台适配器**接入总线：
+> - **Hermes** → `contrib/hermes-adapter/agent_bus.py`（作为原生平台加载）
+> - **OpenClaw** → `packages/typescript-sdk/`（作为 ChannelPlugin 加载）
+> - **其他语言/项目** → 参照 `packages/python-sdk/` 协议实现
+
+### 总线服务端（开发模式）
+
 ```bash
-# Python SDK
-pip install agent-bus-channel-plugin
-
-# TypeScript SDK
-npm install claw-bus
-
-# 总线服务端（开发模式）
 cd packages/bus-server
 npm install
 npm run dev

@@ -35,6 +35,11 @@ npm install
 npm run dev
 ```
 
+> **⚠️ 安全提醒**
+>
+> 管理面板的登录密码由 `ADMIN_TOKEN` 环境变量控制，**默认值为 `'admin'`**。
+> 生产部署前请务必设置为强密码。详见 `.env.server.example` 或 `DEPLOY_SYSTEMD.md`。
+
 ## 组件说明
 
 | 组件 | 语言 | 版本 | 维护者 |
@@ -43,7 +48,7 @@ npm run dev
 | **Python SDK** | Python 3.10+ | v1.1.2 | 通用 |
 | **TypeScript SDK** | TypeScript 5+ | v2.0.0 | 小绿 |
 | **Hermes 适配器** | Python 3.13+ | v2.0.0 | 小和 |
-| **管理面板** | React + PWA | 🔜 开发中 | 小艺 |
+| **管理面板** | React + TypeScript + Vite | v1.0 | 小艺 |
 
 ## 协议版本
 

@@ -487,7 +487,7 @@ GET /api/ping
 #### 2.4.2 公开服务探活
 
 ```
-GET /health
+GET /api/health
 ```
 
 **定位：** 公开探活接口，**无需认证**。用于负载均衡、Docker 健康检查、Nginx 反向代理等外部监控。
@@ -499,7 +499,7 @@ GET /health
 { "status": "healthy", "uptime": "7d 12h 34m", "agents_online": 5, "agents_total": 8 }
 ```
 
-> 两个接口的核心区别：`/api/ping` 是**Agent 角色**的存活确认（需 Token），`/health` 是**基础设施角色**的公开探活（无需 Token）。
+> 两个接口的核心区别：`/api/ping` 是**Agent 角色**的存活确认（需 Token），`/api/health` 是**基础设施角色**的公开探活（无需 Token）。
 
 #### 2.4.3 总线统计
 
@@ -1108,7 +1108,7 @@ POST /api/auth/login
 ```
 GET /api/stats          ← 总线统计（Agent 在线数、消息量）
 GET /api/agents         ← Agent 列表及状态
-GET /health             ← 总线健康状态
+GET /api/health             ← 总线健康状态
 ```
 
 **页面布局建议：**
@@ -1456,7 +1456,7 @@ docker logs -f bus-server
 docker compose ps
 
 # REST API 健康检查
-curl http://localhost:4322/health
+curl http://localhost:4322/api/health
 
 # 心跳测试（需 Agent Token）
 curl -H "Authorization: Bearer ***" http://localhost:4322/api/ping
@@ -1516,7 +1516,7 @@ docker compose up -d
 | GET | `/api/files/:id` | Agent | bus | 下载文件 |
 | DELETE | `/api/files/:id` | Agent | bus | 删除文件 |
 | GET | `/api/ping` | Agent | bus | 心跳检查 |
-| GET | `/health` | 无 | bus | 服务状态 |
+| GET | `/api/health` | 无 | bus | 服务状态 |
 | GET | `/api/stats` | Admin | bus | 总线统计 |
 | POST | `/api/auth/login` | Admin Token | panel | 管理员登录 |
 | GET | `/api/search` | Agent | panel | 论坛搜索（社区版） |

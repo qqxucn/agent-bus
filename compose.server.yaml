@@ -2,14 +2,17 @@
 # Agent 消息总线 — 服务端一键部署
 # 在 VPS/服务器上启动总线、中继和管理面板
 #
+# 注意！⚠️ 部署前请先配置 .env.server 文件
+# 默认 ADMIN_TOKEN='admin'，生产环境务必修改！
+#
 # 使用方式（在 VPS 上）：
 #   # 克隆仓库后，一条命令启动全部服务
 #   docker compose -f compose.server.yaml up -d
 #
-# 可选安全增强（创建 .env.server 文件）：
-#   ADMIN_TOKEN=your_secure_admin_token
-#   AGENT_TOKEN_SECRET=agent_registration_secret
-#   RELAY_TOKEN=relay_access_token
+# 创建 .env.server 文件（参考 .env.server.example）：
+#   ADMIN_TOKEN=your_strong_admin_token     ← 🔴 必须修改！
+#   AGENT_TOKEN_SECRET=agent_strong_secret  ← 🔴 必须修改！
+#   RELAY_TOKEN=relay_token
 # =====================================================
 
 services:

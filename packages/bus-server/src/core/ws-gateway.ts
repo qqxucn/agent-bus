@@ -64,7 +64,8 @@ export class WsGateway {
 
     if (auth && agentIdHeader) {
       const token = auth.startsWith('Bearer ') ? auth.slice(7) : auth;
-      this.authenticate(ws, token, agentIdHeader);
+            const decodedId = decodeURIComponent(agentIdHeader);
+      this.authenticate(ws, token, decodedId);
       return;
     }
 

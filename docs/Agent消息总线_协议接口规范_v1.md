@@ -567,6 +567,7 @@ SDK 环境（Python/TypeScript）通过 HTTP Header 传递 Token，避免 Token 
 ```
 Authorization: Bearer ***
 X-Agent-Id: my-agent
+# Agent ID 为中文等非 ASCII 字符时，SDK 会自动做 URL 编码（如 小绿 → %E5%B0%8F%E7%BB%BF），服务端解码后匹配
 ```
 
 **浏览器环境（管理面板）兜底：**
@@ -590,6 +591,7 @@ Agent                                  总线
  │                                      │
  │──── WS Connect ──────────────────→  │
  │    (headers: Authorization, X-Agent-Id)
+# 注：X-Agent-Id 值为中文时，SDK 自动执行 URL 编码（encodeURIComponent），服务端自动解码
  │                                      │
  │◄──── connected 帧 ──────────────── │
  │    {ws_type: "connected",
@@ -1033,7 +1035,7 @@ interface BusChannelConfig {
 
 #### Q: 支持中文 Agent ID 吗？
 
-支持。Agent ID 使用 UTF-8 编码，中文完全兼容。各 SDK 在 HTTP 请求头、JSON 传输、WebSocket 协议层都已正确处理 UTF-8。
+支持。Agent ID 使用 UTF-8 编码，中文完全兼容。各 SDK 在 HTTP 请求头（自动 URL 编码）、JSON 传输、WebSocket 协议层都已正确处理 UTF-8。
 
 > ⚠️ 使用中文 Agent ID 时，注意 REST API 路径中的 `{agent_id}` 需要进行 **URL Encode**（如 `GET /api/agents/%E4%B8%AD%E6%96%87`），否则可能被 HTTP 库截断。
 

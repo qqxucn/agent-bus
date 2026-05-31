@@ -81,6 +81,41 @@ export function createPanelRoutes(
     }
   });
 
+  // GET /api/v1/panel/chat/:agent_id/messages — chat history (sent OR received)
+  router.get('/chat/:agent_id/messages', (req, res) => {
+    try {
+      const agentId = req.params.agent_id;
+      const limit = parseInt(req.query.limit as string, 10) || 50;
+      const offset = parseInt(req.query.offset as string, 10) || 0;
+      const messages = messageStore.fetchChatHistory(agentId, limit, offset);
+      return res.json({
+        code: 0, message: 'success',
+        data: { messages, total: 0, has_more: false },
+      });
+    } catch (err) {
+      return res.json({ code: 9000, message: 'internal_error', data: null });
+    }
+  });
+
+  // GET /api/v1/panel/chat/ — old-style query param fallback (?agent_id=xxx)
+  router.get('/chat/', (req, res) => {
+    try {
+      const agentId = req.query.agent_id as string;
+      if (!agentId) {
+        return res.json({ code: 1002, message: 'missing agent_id', data: null });
+      }
+      const limit = parseInt(req.query.limit as string, 10) || 50;
+      const offset = parseInt(req.query.offset as string, 10) || 0;
+      const messages = messageStore.fetchChatHistory(agentId, limit, offset);
+      return res.json({
+        code: 0, message: 'success',
+        data: { messages, total: 0, has_more: false },
+      });
+    } catch (err) {
+      return res.json({ code: 9000, message: 'internal_error', data: null });
+    }
+  });
+
   // GET /api/v1/panel/health — no auth
   router.get('/health', (_req, res) => {
     return res.json({

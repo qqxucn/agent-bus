@@ -250,6 +250,33 @@ export function createMessageStore(db: Database) {
       return results;
     },
 
+    fetchChatHistory(agentId: string, limit: number, offset: number): StoredMessage[] {
+      const params: Record<string, any> = {
+        $agent: agentId,
+        $limit: Math.min(limit, 200),
+        $offset: offset,
+      };
+      const stmt = db.db.prepare(
+        'SELECT * FROM messages WHERE (from_agent = $agent OR to_agent = $agent) ORDER BY sent_at ASC LIMIT $limit OFFSET $offset'
+      );
+      stmt.bind(params);
+      const messages: StoredMessage[] = [];
+      while (stmt.step()) {
+        const row = stmt.getAsObject() as any;
+        messages.push({
+          message_id: row.message_id, from_agent: row.from_agent,
+          sender_type: row.sender_type, to_agent: row.to_agent,
+          type: row.type, content: row.content, sent_at: row.sent_at,
+          status: row.status, delivered_at: row.delivered_at, read_at: row.read_at,
+          ref_id: row.ref_id, session_id: row.session_id,
+          file_id: row.file_id, file_name: row.file_name,
+          file_size: row.file_size, caption: row.caption,
+        });
+      }
+      stmt.free();
+      return messages;
+    },
+
     searchMessages(query: MessageSearchRequest): MessageSearchResponse {
       const page = query.page ?? 1;
       const pageSize = Math.min(query.page_size ?? 20, 100);

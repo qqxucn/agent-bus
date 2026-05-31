@@ -41,9 +41,8 @@ export function createMessageStore(db: Database) {
     fetchInbox(query: InboxQuery): InboxResponse {
       const limit = Math.min(query.limit ?? 50, 200);
       const offset = query.offset ?? 0;
-      const markRead = query.mark_read === true;
 
-      // Count total for this agent
+      // Count total
       let countSql =
         'SELECT COUNT(*) as cnt FROM messages WHERE to_agent = $agent';
       const countParams: Record<string, any> = { $agent: query.agent_id };
@@ -77,6 +76,7 @@ export function createMessageStore(db: Database) {
       stmt.bind(params);
 
       const messages: StoredMessage[] = [];
+      const now = new Date().toISOString();
       const updateIds: string[] = [];
 
       while (stmt.step()) {
@@ -100,25 +100,34 @@ export function createMessageStore(db: Database) {
           caption: row.caption,
         });
 
-        // 仅当 mark_read=true 时标记为已读/已送达
-        if (markRead && row.status === 'pending') {
+        if (row.status === 'pending') {
           updateIds.push(row.message_id);
         }
       }
       stmt.free();
 
-      // Mark as delivered/read
-      if (updateIds.length > 0) {
-        const now = new Date().toISOString();
+      // Auto-mark delivered (普通拉取时自动标记已送达)
+      if (updateIds.length > 0 && !query.mark_read) {
         const updateStmt = db.db.prepare(
-          'UPDATE messages SET status = $status, delivered_at = $at, read_at = $at WHERE message_id = $id'
+          'UPDATE messages SET status = $status, delivered_at = $at WHERE message_id = $id'
         );
         for (const id of updateIds) {
-          updateStmt.bind({ $status: 'read', $at: now, $id: id });
+          updateStmt.bind({ $status: 'delivered', $at: now, $id: id });
           updateStmt.step();
           updateStmt.reset();
         }
         updateStmt.free();
+        db.save();
+      }
+
+      // mark_read=true → 标记为已读
+      if (query.mark_read) {
+        const readStmt = db.db.prepare(
+          'UPDATE messages SET status = $status, read_at = $at WHERE to_agent = $agent AND status != $status'
+        );
+        readStmt.bind({ $status: 'read', $at: now, $agent: query.agent_id });
+        readStmt.step();
+        readStmt.free();
         db.save();
       }
 

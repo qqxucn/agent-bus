@@ -64,11 +64,14 @@ export function createMessageController(
     }
   });
 
-  // GET /api/messages/inbox?limit=20&mark_read=true
+  // GET /api/messages/inbox?agent_id=xxx&limit=20&offset=0&since=xxx&mark_read=true
   router.get('/inbox', (req, res) => {
     try {
-      const agentId = (req as any).agentId as string;
-      if (!agentId || agentId === '__admin__') {
+      const authAgentId = (req as any).agentId as string;
+      const agentId = authAgentId === '__admin__'
+        ? (req.query.agent_id as string)
+        : authAgentId;
+      if (!agentId) {
         return res.json({ code: 1002, message: 'invalid_message', data: null } as ApiResponse);
       }
 

@@ -49,11 +49,10 @@ export function createMessageController(
       // Save message
       messageStore.saveMessage(message);
 
-      // If target is online via WS, push it
-      const online = core.getAgentStatus(body.to) === 'online';
-      if (online) {
-        core.pushToAgent(body.to, message).catch(() => {});
-      }
+      // Push to target via WS (always try — pushToAgent checks pool internally)
+      core.pushToAgent(body.to, message).catch((err: any) => {
+        console.warn("[send] WS push failed:", err?.message ?? err);
+      });
 
       return res.json({
         code: 0, message: 'success',

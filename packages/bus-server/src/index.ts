@@ -72,11 +72,6 @@ async function main() {
 
   // Panel API routes (admin auth) — /api/v1/panel/*
   const adminAuth = requireAdmin(config);
-  const panelRoutes = createPanelRoutes(agentStore, messageStore, core.pool);
-  app.use('/api/v1/panel', adminAuth, panelRoutes);
-
-  // Panel frontend static files (from panel-frontend/)
-  const panelFrontendPath = path.join(__dirname, "..", "panel-frontend", "dist");
   app.use('/panel', express.static(panelFrontendPath));
   // SPA fallback for panel
   app.use("/panel", (_req, res) => { res.sendFile(path.join(panelFrontendPath, "index.html")); });

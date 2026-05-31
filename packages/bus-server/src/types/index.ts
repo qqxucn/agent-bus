@@ -1,6 +1,6 @@
 // ========================================================
 // Agent 消息总线 — 总线服务端 共享类型定义
-// 版本: v1.1
+// 版本: v1.0
 // ========================================================
 
 // ========== 基本类型 ==========
@@ -105,11 +105,10 @@ export interface SendMessageRequest {
 }
 
 export interface InboxQuery {
-  agent_id?: string;
+  agent_id: string;
   limit?: number;
   offset?: number;
   since?: string;
-  /** 拉取后自动标记为已读（默认 false） */
   mark_read?: boolean;
 }
 
@@ -135,9 +134,9 @@ export interface SystemStats {
   total_agents: number;
   online_agents: number;
   total_messages: number;
+  messages_today: number;
   total_files: number;
   storage_used_mb: number;
-  messages_today: number;
   uptime_seconds: number;
   version: string;
 }
@@ -160,6 +159,16 @@ export interface MessageLogEntry {
   status: 'pending' | 'delivered' | 'read';
 }
 
+// ========== 文件信息 ==========
+
+export interface FileInfo {
+  file_id: string;
+  file_name: string;
+  file_size: number;
+  uploaded_by: string;
+  uploaded_at: string;
+}
+
 // ========== 消息搜索 ==========
 
 export interface MessageSearchRequest {
@@ -177,16 +186,6 @@ export interface MessageSearchResponse {
   total: number;
   page: number;
   page_size: number;
-}
-
-// ========== 文件 ==========
-
-export interface FileInfo {
-  file_id: string;
-  file_name: string;
-  file_size: number;
-  uploaded_by: string;
-  uploaded_at: string;
 }
 
 // ========== 配置 ==========

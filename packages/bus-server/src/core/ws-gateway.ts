@@ -123,7 +123,10 @@ export class WsGateway {
   private registerConnection(ws: WebSocket, agentId: string): void {
     this.pool.register(agentId, ws);
     this.heartbeat.updateHeartbeat(agentId);
-    this.agentStore.updateAgentStatus(agentId, 'online');
+    // admin not in agent store, skip updateAgentStatus
+    if (agentId !== 'admin') {
+      this.agentStore.updateAgentStatus(agentId, 'online');
+    }
 
     this.sendFrame(ws, { ws_type: 'connected', payload: { agent_id: agentId } });
     this.listenMessages(ws, agentId);
@@ -156,6 +159,8 @@ export class WsGateway {
     switch (frame.ws_type) {
       case 'ping':
         await this.sendFrame(ws, { ws_type: 'pong' });
+        this.heartbeat.updateHeartbeat(agentId);
+        this.agentStore.updateHeartbeat(agentId);
         break;
       case 'pong':
         this.heartbeat.updateHeartbeat(agentId);

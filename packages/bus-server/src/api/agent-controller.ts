@@ -79,6 +79,24 @@ export function createAgentController(config: BusServerConfig, agentStore: Agent
     }
   });
 
+  // PATCH /api/agents/:id — update agent info (admin token required)
+  router.patch('/:id', (req, res) => {
+    try {
+      const agent = agentStore.getAgent(req.params.id);
+      if (!agent) {
+        return res.json({ code: 1003, message: 'agent_not_found', data: null } as ApiResponse);
+      }
+
+      if (req.body.display_name !== undefined) {
+        agentStore.updateAgentDisplayName(req.params.id, req.body.display_name);
+      }
+
+      return res.json({ code: 0, message: 'success', data: null } as ApiResponse);
+    } catch (err) {
+      return res.json({ code: 9000, message: 'internal_error', data: null } as ApiResponse);
+    }
+  });
+
   // DELETE /api/agents/:id — admin token required
   router.delete('/:id', (req, res) => {
     try {

@@ -94,6 +94,16 @@ export function createAgentStore(db: Database, config: BusServerConfig) {
       stmt.free();
     },
 
+    updateAgentDisplayName(agentId: string, displayName: string): void {
+      const stmt = db.db.prepare(
+        'UPDATE agents SET display_name = $name WHERE agent_id = $id'
+      );
+      stmt.bind({ $name: displayName, $id: agentId });
+      stmt.step();
+      stmt.free();
+      db.save();
+    },
+
     getAgentCount(): number {
       const stmt = db.db.prepare('SELECT COUNT(*) as cnt FROM agents');
       stmt.step();

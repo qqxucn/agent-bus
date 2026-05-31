@@ -57,3 +57,47 @@ npm run dev
 ## License
 
 MIT
+
+---
+
+## 🚨 部署注意事项
+
+### bus-server 只能部署在独立服务器上！
+
+**不要**在 Hermes / OpenClaw 等 Agent 所在的环境中运行 bus-server。
+
+| 环境 | 应该部署什么 |
+|:-----|:------------|
+| 🖥️ VPS / 云服务器 | `bus-server`（服务端） → `npm run build && npm start` |
+| 🤖 Hermes / OpenClaw Agent | 只连接远程总线（作为客户端），通过适配器 SDK |
+| 🐳 Docker 容器 | 参考 `compose.yaml`，在独立容器中运行 |
+
+### 安全防护
+
+bus-server 入口文件（`src/index.ts`）内置了**环境检测**：
+- 检测到 `AGENT_BUS_ENABLED`、`AGENT_BUS_AGENT_ID` 等 Agent 环境变量时
+- 自动拒绝启动并给出清晰的错误提示
+- 防止误将服务端部署到 Agent 环境
+
+### 正确部署流程
+
+```bash
+# ✅ 在独立服务器上
+git clone https://github.com/qqxucn/agent-bus.git
+cd agent-bus/packages/bus-server
+npm install
+npm run build
+ADMIN_TOKEN=your_secret AGENT_TOKEN_SECRET=your_secret npm start
+```
+
+### Agent 连接示例
+
+```env
+# Hermes / OpenClaw 的 .env 配置（无需安装 bus-server）
+AGENT_BUS_ENABLED=true
+AGENT_BUS_URL=http://your-server:4322
+AGENT_BUS_WS_URL=ws://your-server:4322/ws
+AGENT_BUS_AGENT_ID=my-agent
+AGENT_BUS_MODE=websocket
+```
+

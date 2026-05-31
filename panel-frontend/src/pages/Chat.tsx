@@ -96,7 +96,8 @@ export function ChatPage() {
 
     try {
       const resp = await fetchInbox(agentId, CONFIG.chatLoadMore, 0);
-      setMessages(resp.messages.reverse()); // 旧消息在前
+      // API返回旧→新，保持顺序，不要reverse（避免打开时从头滑到最新）
+      setMessages(resp.messages);
       setHasMore(resp.has_more);
       offsetRef.current = resp.messages.length;
     } catch (err: unknown) {
@@ -112,7 +113,8 @@ export function ChatPage() {
     setLoading(true);
     try {
       const resp = await fetchInbox(activeAgent, CONFIG.chatLoadMore, offsetRef.current);
-      setMessages((prev) => [...resp.messages.reverse(), ...prev]);
+      // API返回旧→新（更早的消息在前），追加到现有消息前面
+      setMessages((prev) => [...resp.messages, ...prev]);
       setHasMore(resp.has_more);
       offsetRef.current += resp.messages.length;
     } catch (err: unknown) {
@@ -147,14 +149,20 @@ export function ChatPage() {
         type: 'text',
         content: text,
       });
-      // 更新为已发送
-      setMessages((prev) =>
-        prev.map((m) =>
+      // 更新为已发送，同时去重（防WS推送先到导致重复）
+      setMessages((prev) => {
+        // 先检查是否已有真实 message_id（WS推送先到了）
+        const alreadyExists = prev.some((m) => m.message_id === result.message_id);
+        if (alreadyExists) {
+          // WS推送已加入，只需移除乐观消息
+          return prev.filter((m) => m.message_id !== optimisticId);
+        }
+        return prev.map((m) =>
           m.message_id === optimisticId
             ? { ...m, message_id: result.message_id, status: 'delivered' as const }
             : m,
-        ),
-      );
+        );
+      });
     } catch (err: unknown) {
       // 标记失败
       setMessages((prev) =>

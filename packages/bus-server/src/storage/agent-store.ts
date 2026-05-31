@@ -104,6 +104,16 @@ export function createAgentStore(db: Database, config: BusServerConfig) {
       db.save();
     },
 
+    updateAgentMode(agentId: string, mode: string): void {
+      const stmt = db.db.prepare(
+        'UPDATE agents SET mode = $mode WHERE agent_id = $id'
+      );
+      stmt.bind({ $mode: mode, $id: agentId });
+      stmt.step();
+      stmt.free();
+      db.save();
+    },
+
     getAgentCount(): number {
       const stmt = db.db.prepare('SELECT COUNT(*) as cnt FROM agents');
       stmt.step();

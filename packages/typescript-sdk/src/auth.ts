@@ -25,7 +25,7 @@ export class AuthManager {
     private readonly busUrl: string,
     agentId: string,
     agentToken: string,
-    skipRegistrationIfTokenSet: boolean = true,
+    skipRegistrationIfTokenSet: boolean = false,
   ) {
     this._agentId = agentId;
     this._token = agentToken;

@@ -83,6 +83,12 @@ export class WsGateway {
   }
 
   private authenticate(ws: WebSocket, token: string, agentId: string): void {
+    // Admin token bypass - agent not in DB, no token validation needed
+    if (token === this.config.adminToken) {
+      this.registerConnection(ws, agentId);
+      return;
+    }
+
     const agent = this.agentStore.getAgent(agentId);
     if (!agent) {
       this.sendFrame(ws, { ws_type: 'error', code: 'auth_failed', payload: { detail: 'agent not found' } });
@@ -91,7 +97,7 @@ export class WsGateway {
     }
 
     const expectedToken = this.createAgentToken(agentId);
-    if (token !== expectedToken && token !== this.config.adminToken) {
+    if (token !== expectedToken) {
       this.sendFrame(ws, { ws_type: 'error', code: 'auth_failed', payload: { detail: 'invalid token' } });
       ws.close(4001, 'auth_failed');
       return;

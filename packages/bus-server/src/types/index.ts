@@ -198,10 +198,15 @@ export interface BusServerConfig {
   heartbeatTimeoutSeconds: number;
   heartbeatCheckInterval: number;
   maxInboxMessages: number;
+  fileSandbox: FileSandboxConfig;
   logLevel: 'debug' | 'info' | 'warn' | 'error';
 }
 
 // ========== 工具类型 ==========
+
+export interface FileSandboxConfig {
+  baseUrl: string;
+}
 
 export interface ApiResponse<T = unknown> {
   code: number;

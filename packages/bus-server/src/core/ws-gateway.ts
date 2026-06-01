@@ -148,13 +148,15 @@ export class WsGateway {
       }
     });
 
-    ws.on('close', () => {
+    ws.on('close', (code: number, reason: Buffer) => {
+      console.log('[ws-gateway] Agent', agentId, 'closed: code=' + code + ' reason=' + reason.toString());
       this.pool.unregister(agentId);
       this.heartbeat.removeHeartbeat(agentId);
       this.agentStore.updateAgentStatus(agentId, 'offline');
     });
 
-    ws.on('error', () => {
+    ws.on('error', (err: Error) => {
+      console.log('[ws-gateway] Agent', agentId, 'error:', err.message);
       this.pool.unregister(agentId);
       this.heartbeat.removeHeartbeat(agentId);
       this.agentStore.updateAgentStatus(agentId, 'offline');

@@ -44,7 +44,7 @@ export function createMessageStore(db: Database) {
 
       // Count total
       let countSql =
-        'SELECT COUNT(*) as cnt FROM messages WHERE to_agent = $agent';
+        'SELECT COUNT(*) as cnt FROM messages WHERE (from_agent = $agent OR to_agent = $agent)';
       const countParams: Record<string, any> = { $agent: query.agent_id };
       if (query.since) {
         countSql += ' AND sent_at >= $since';
@@ -57,7 +57,7 @@ export function createMessageStore(db: Database) {
       countStmt.free();
 
       // Fetch messages
-      let sql = 'SELECT * FROM messages WHERE to_agent = $agent';
+      let sql = 'SELECT * FROM messages WHERE (from_agent = $agent OR to_agent = $agent)';
       if (query.since) {
         sql += ' AND sent_at >= $since';
       }

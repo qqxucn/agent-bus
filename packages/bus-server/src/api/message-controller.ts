@@ -51,8 +51,14 @@ export function createMessageController(
 
       // Push to target via WS (always try — pushToAgent checks pool internally)
       core.pushToAgent(body.to, message).catch((err: any) => {
-        console.warn("[send] WS push failed:", err?.message ?? err);
+        console.warn("[send] WS push to target failed:", err?.message ?? err);
       });
+      // Also push back to sender so WS-connected UI sees their own message
+      if (body.from !== body.to) {
+        core.pushToAgent(body.from, message).catch((err: any) => {
+          console.warn("[send] WS push to sender failed:", err?.message ?? err);
+        });
+      }
 
       return res.json({
         code: 0, message: 'success',

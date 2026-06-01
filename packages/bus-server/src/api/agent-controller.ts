@@ -105,6 +105,25 @@ export function createAgentController(config: BusServerConfig, agentStore: Agent
     } catch (err) {
       return res.json({ code: 9000, message: 'internal_error', data: null } as ApiResponse);
     }
+
+  });
+
+
+
+  // POST /api/agents/:id/heartbeat - poll mode heartbeat (agent self-report)
+  router.post('/:id/heartbeat', (req, res) => {
+    try {
+      const agentId = decodeURIComponent(req.params.id);
+      const agent = agentStore.getAgent(agentId);
+      if (!agent) {
+        return res.json({ code: 1003, message: 'agent_not_found', data: null } as ApiResponse);
+      }
+      agentStore.updateHeartbeat(agentId);
+      agentStore.updateAgentStatus(agentId, 'online');
+      return res.json({ code: 0, message: 'success', data: { agent_id: agentId } } as ApiResponse);
+    } catch (err) {
+      return res.json({ code: 9000, message: 'internal_error', data: null } as ApiResponse);
+    }
   });
 
   return router;

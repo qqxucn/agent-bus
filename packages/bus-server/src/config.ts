@@ -17,6 +17,7 @@ export function loadConfig(): BusServerConfig {
     heartbeatTimeoutSeconds: parseInt(process.env.HEARTBEAT_TIMEOUT ?? '60', 10),
     heartbeatCheckInterval: parseInt(process.env.HEARTBEAT_CHECK_INTERVAL ?? '15', 10),
     maxInboxMessages: parseInt(process.env.MAX_INBOX_MESSAGES ?? '200', 10),
+    fileSandbox: { baseUrl: process.env.FILE_SANDBOX_URL || "http://localhost:4323" },
     logLevel: (process.env.LOG_LEVEL as BusServerConfig['logLevel']) ?? 'info',
   };
 }

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { fetchAgents, fetchInbox, sendMessage } from '../api/client';
+import { fetchAgents, fetchConversation, sendMessage } from '../api/client';
 import { WsClient, type WsMessageHandler, type WsStatusHandler } from '../api/ws';
 import type { AgentListItem, StoredMessage } from '../types';
 import { showToast } from '../components/Toast';
@@ -78,7 +78,7 @@ export function ChatPage() {
   // 自动滚动到底部
   const scrollToBottom = useCallback(() => {
     setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
     }, 50);
   }, []);
 
@@ -95,26 +95,63 @@ export function ChatPage() {
     setLoading(true);
 
     try {
-      const resp = await fetchInbox(agentId, CONFIG.chatLoadMore, 0);
-      // API返回旧→新，保持顺序，不要reverse（避免打开时从头滑到最新）
-      setMessages(resp.messages);
+      const resp = await fetchConversation(agentId, 1, CONFIG.chatLoadMore);
+      setMessages(resp.messages.reverse()); // 旧消息在前
+      const resp = await fetchConversation(agentId, 1, CONFIG.chatLoadMore);
+      setMessages(resp.messages.reverse()); // 旧消息在前
+      const resp = await fetchConversation(agentId, 1, CONFIG.chatLoadMore);
+      setMessages(resp.messages.reverse()); // 旧消息在前
+      const resp = await fetchConversation(agentId, 1, CONFIG.chatLoadMore);
+      setMessages(resp.messages.reverse()); // 旧消息在前
+      const resp = await fetchConversation(agentId, 1, CONFIG.chatLoadMore);
+      setMessages(resp.messages.reverse()); // 旧消息在前
+      const resp = await fetchConversation(agentId, 1, CONFIG.chatLoadMore);
+      setMessages(resp.messages.reverse()); // 旧消息在前
+      const resp = await fetchConversation(agentId, 1, CONFIG.chatLoadMore);
+      setMessages(resp.messages.reverse()); // 旧消息在前
+      const resp = await fetchConversation(agentId, 1, CONFIG.chatLoadMore);
+      setMessages(resp.messages.reverse()); // 旧消息在前
       setHasMore(resp.has_more);
       offsetRef.current = resp.messages.length;
     } catch (err: unknown) {
       showToast('error', `加载消息失败: ${err instanceof Error ? err.message : ''}`);
     } finally {
       setLoading(false);
-    }
-  };
-
-  // 加载更多历史消息
-  const loadMore = async () => {
-    if (!activeAgent || loading || !hasMore) return;
-    setLoading(true);
-    try {
+      const page = Math.floor(offsetRef.current / CONFIG.chatLoadMore) + 2;
+      const resp = await fetchConversation(activeAgent, page, CONFIG.chatLoadMore);
+      setMessages((prev) => [...resp.messages.reverse(), ...prev]);
+      const page = Math.floor(offsetRef.current / CONFIG.chatLoadMore) + 2;
+      const resp = await fetchConversation(activeAgent, page, CONFIG.chatLoadMore);
+      setMessages((prev) => [...resp.messages.reverse(), ...prev]);
+      const page = Math.floor(offsetRef.current / CONFIG.chatLoadMore) + 2;
+      const resp = await fetchConversation(activeAgent, page, CONFIG.chatLoadMore);
+      setMessages((prev) => [...resp.messages.reverse(), ...prev]);
+      const page = Math.floor(offsetRef.current / CONFIG.chatLoadMore) + 2;
+      const resp = await fetchConversation(activeAgent, page, CONFIG.chatLoadMore);
+      setMessages((prev) => [...resp.messages.reverse(), ...prev]);
+      const page = Math.floor(offsetRef.current / CONFIG.chatLoadMore) + 2;
+      const resp = await fetchConversation(activeAgent, page, CONFIG.chatLoadMore);
+      setMessages((prev) => [...resp.messages.reverse(), ...prev]);
+      const page = Math.floor(offsetRef.current / CONFIG.chatLoadMore) + 2;
+      const resp = await fetchConversation(activeAgent, page, CONFIG.chatLoadMore);
+      setMessages((prev) => [...resp.messages.reverse(), ...prev]);
+      const page = Math.floor(offsetRef.current / CONFIG.chatLoadMore) + 2;
+      const resp = await fetchConversation(activeAgent, page, CONFIG.chatLoadMore);
+      setMessages((prev) => [...resp.messages.reverse(), ...prev]);
+      const page = Math.floor(offsetRef.current / CONFIG.chatLoadMore) + 2;
+      const resp = await fetchConversation(activeAgent, page, CONFIG.chatLoadMore);
+      setMessages((prev) => [...resp.messages.reverse(), ...prev]);
+      const page = Math.floor(offsetRef.current / CONFIG.chatLoadMore) + 2;
+      const resp = await fetchConversation(activeAgent, page, CONFIG.chatLoadMore);
+      setMessages((prev) => [...resp.messages.reverse(), ...prev]);
       const resp = await fetchInbox(activeAgent, CONFIG.chatLoadMore, offsetRef.current);
       // API返回旧→新（更早的消息在前），追加到现有消息前面
       setMessages((prev) => [...resp.messages, ...prev]);
+=======
+      const page = Math.floor(offsetRef.current / CONFIG.chatLoadMore) + 2;
+      const resp = await fetchConversation(activeAgent, page, CONFIG.chatLoadMore);
+      setMessages((prev) => [...resp.messages.reverse(), ...prev]);
+>>>>>>> 7e06877 (fix: fetchInbox returns bidirectional messages (from_agent OR to_agent))
       setHasMore(resp.has_more);
       offsetRef.current += resp.messages.length;
     } catch (err: unknown) {

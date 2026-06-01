@@ -124,6 +124,20 @@ export async function fetchInbox(
   return handleResponse<InboxResponse>(res);
 }
 
+
+/** Get conversation messages (bidirectional) */
+export async function fetchConversation(
+  agentId: string, page = 1, pageSize = 50
+): Promise<{ messages: any[]; total: number; has_more: boolean }> {
+  const res = await fetch(CONFIG.busUrl + '/api/messages/search', {
+    method: 'POST',
+    headers: headers(),
+    body: JSON.stringify({ agent_id: agentId, page, page_size: pageSize }),
+  });
+  const data = await handleResponse<any>(res);
+  return { messages: data.messages, total: data.total, has_more: data.page * data.page_size < data.total };
+}
+
 /** 发送消息 */
 export async function sendMessage(req: SendMessageRequest): Promise<{ message_id: string }> {
   const res = await fetch(`${CONFIG.busUrl}/api/messages/send`, {
